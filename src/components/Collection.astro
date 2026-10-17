@@ -80,7 +80,7 @@ const dresses = [
 >
   <div class="container">
     <div class="section-header">
-      <h2 class="section-title">Colección & Galería</h2>
+      <h2 class="section-title">Colección &amp; Galería</h2>
       <div class="section-divider"></div>
       <p class="section-description">
         Explora nuestros diseños más icónicos. Cada diseño sirve como punto de
@@ -89,20 +89,16 @@ const dresses = [
     </div>
 
     <!-- Filter Bar -->
-    <div class="filter-bar">
-      <button class="filter-btn active" data-filter="all"
-        >Todas los Diseños</button
-      >
-      <button class="filter-btn" data-filter="aline">Corte A-Line</button>
-      <button class="filter-btn" data-filter="princesa"
-        >Princesa / Ball Gown</button
-      >
-      <button class="filter-btn" data-filter="sirena">Sirena / Mermaid</button>
-      <button class="filter-btn" data-filter="gala">Alta Gala & Fiesta</button>
+    <div class="filter-bar" role="toolbar" aria-label="Filtros de colección">
+      <button class="filter-btn active" data-filter="all" aria-pressed="true">Todas los Diseños</button>
+      <button class="filter-btn" data-filter="aline" aria-pressed="false">Corte A-Line</button>
+      <button class="filter-btn" data-filter="princesa" aria-pressed="false">Princesa / Ball Gown</button>
+      <button class="filter-btn" data-filter="sirena" aria-pressed="false">Sirena / Mermaid</button>
+      <button class="filter-btn" data-filter="gala" aria-pressed="false">Alta Gala &amp; Fiesta</button>
     </div>
 
     <!-- Collection Grid -->
-    <div class="collection-grid" id="collection-grid">
+    <div class="collection-grid" id="collection-grid" aria-live="polite">
       {dresses.map((dress) => <CollectionCard {...dress} />)}
     </div>
   </div>
@@ -110,35 +106,25 @@ const dresses = [
 
 <script>
   function initGalleryFilters() {
-    const filterBtns = document.querySelectorAll(".filter-btn");
-    const collectionCards = document.querySelectorAll(".collection-card");
+    const filterBtns = document.querySelectorAll<HTMLButtonElement>(".filter-btn");
+    const collectionCards = document.querySelectorAll<HTMLElement>(".collection-card");
 
     if (!filterBtns.length || !collectionCards.length) return;
 
     filterBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
-        filterBtns.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
+        const newFilter = btn.getAttribute("data-filter") ?? "all";
 
-        const filter = btn.getAttribute("data-filter");
+        filterBtns.forEach((b) => {
+          const isActive = b === btn;
+          b.classList.toggle("active", isActive);
+          b.setAttribute("aria-pressed", isActive ? "true" : "false");
+        });
 
         collectionCards.forEach((card) => {
-          const el = card as HTMLElement;
-          const category = el.getAttribute("data-category");
-
-          if (filter === "all" || category === filter) {
-            el.style.display = "flex";
-            setTimeout(() => {
-              el.style.opacity = "1";
-              el.style.transform = "translateY(0)";
-            }, 50);
-          } else {
-            el.style.opacity = "0";
-            el.style.transform = "translateY(10px)";
-            setTimeout(() => {
-              el.style.display = "none";
-            }, 300);
-          }
+          const category = card.getAttribute("data-category");
+          const matches = newFilter === "all" || category === newFilter;
+          card.hidden = !matches;
         });
       });
     });

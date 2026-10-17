@@ -24,13 +24,22 @@ const {
 
 <article class="collection-card" data-category={categoryTag}>
   <div class="collection-card-media">
-    <img src={imageSrc} alt={imageAlt} loading="lazy" />
+    <img
+      src={imageSrc}
+      alt={imageAlt}
+      width="800"
+      height="1100"
+      loading="lazy"
+      decoding="async"
+    />
   </div>
   <div class="collection-card-body">
     <div>
+      <span class="collection-card-badge">{badge}</span>
       <p class="collection-card-category">{category}</p>
     </div>
     <button
+      type="button"
       class="card-action-btn"
       aria-label={`Ver detalles del modelo ${title}`}
       data-open-modal

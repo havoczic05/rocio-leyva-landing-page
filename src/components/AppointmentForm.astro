@@ -1,5 +1,7 @@
 ---
-
+const today = new Date();
+today.setDate(today.getDate() + 1);
+const minDate = today.toISOString().slice(0, 10);
 ---
 
 <section
@@ -17,7 +19,7 @@
     </div>
 
     <div class="appointment-wrapper">
-      <form class="appointment-form" id="appointment-form">
+      <form class="appointment-form" id="appointment-form" novalidate>
         <div
           class="form-group-full"
           style="text-align: center; margin-bottom: 0.5rem;"
@@ -33,8 +35,12 @@
           <input
             type="text"
             id="nombre"
+            name="nombre"
             class="form-input"
             placeholder="Ej. Sofía Mendoza"
+            autocomplete="name"
+            minlength="2"
+            maxlength="80"
             required
           />
         </div>
@@ -44,8 +50,12 @@
           <input
             type="email"
             id="email"
+            name="email"
             class="form-input"
             placeholder="ejemplo@correo.com"
+            autocomplete="email"
+            inputmode="email"
+            maxlength="120"
             required
           />
         </div>
@@ -55,8 +65,13 @@
           <input
             type="tel"
             id="telefono"
+            name="telefono"
             class="form-input"
             placeholder="+51 987 654 321"
+            autocomplete="tel"
+            inputmode="tel"
+            pattern="[+0-9 ()-]{6,}"
+            maxlength="25"
             required
           />
         </div>
@@ -65,7 +80,14 @@
           <label for="fecha-boda" class="form-label"
             >Fecha Estimada de la Boda *</label
           >
-          <input type="date" id="fecha-boda" class="form-input" required />
+          <input
+            type="date"
+            id="fecha-boda"
+            name="fecha-boda"
+            class="form-input"
+            min={minDate}
+            required
+          />
         </div>
 
         <div class="form-field form-group-full">
@@ -74,9 +96,17 @@
           >
           <textarea
             id="mensaje"
+            name="mensaje"
             class="form-textarea"
             placeholder="Cuéntanos sobre tu ceremonia, el lugar o cualquier detalle especial que desees incluir..."
+            maxlength="1000"
           ></textarea>
+        </div>
+
+        <!-- Honeypot anti-spam -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="website">No completar</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
         </div>
 
         <div
@@ -97,11 +127,10 @@
         id="form-success-banner"
         class="form-success-banner"
         style="display: none;"
-        role="alert"
+        role="status"
+        aria-live="polite"
       >
-        <i
-          class="fa-solid fa-circle-check gold-text"
-          style="font-size: 2.0rem; margin-bottom: 0.75rem;"></i>
+        <svg class="icon-inline gold-text" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor" width="36" height="36" style="margin-bottom: 0.75rem;"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.4 14.6L6 12l1.4-1.4 3.2 3.2 6-6L18 9.2l-7.4 7.4z"/></svg>
         <h3
           style="font-size: 1.35rem; margin-bottom: 0.5rem;"
           id="success-title"
@@ -130,31 +159,34 @@
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
+      // Honeypot: bots fill this hidden field; humans don't see it.
+      const honeypot = (form.querySelector('input[name="website"]') as HTMLInputElement | null);
+      if (honeypot && honeypot.value.trim() !== "") {
+        // Silently act like it worked
+        form.style.display = "none";
+        const banner = document.getElementById("form-success-banner");
+        if (banner) banner.style.display = "block";
+        return;
+      }
+
+      // Use browser validation (still required attrs)
+      if (!form.reportValidity()) return;
+
       const successBanner = document.getElementById("form-success-banner");
       const successTitle = document.getElementById("success-title");
       const successBody = document.getElementById("success-body");
 
-      const nombreEl = document.getElementById(
-        "nombre",
-      ) as HTMLInputElement | null;
-      const emailEl = document.getElementById(
-        "email",
-      ) as HTMLInputElement | null;
-      const telefonoEl = document.getElementById(
-        "telefono",
-      ) as HTMLInputElement | null;
-      const fechaBodaEl = document.getElementById(
-        "fecha-boda",
-      ) as HTMLInputElement | null;
-      const mensajeEl = document.getElementById(
-        "mensaje",
-      ) as HTMLTextAreaElement | null;
+      const nombreEl = form.querySelector("#nombre") as HTMLInputElement | null;
+      const emailEl = form.querySelector("#email") as HTMLInputElement | null;
+      const telefonoEl = form.querySelector("#telefono") as HTMLInputElement | null;
+      const fechaBodaEl = form.querySelector("#fecha-boda") as HTMLInputElement | null;
+      const mensajeEl = form.querySelector("#mensaje") as HTMLTextAreaElement | null;
 
-      const nombre = nombreEl?.value || "";
-      const email = emailEl?.value || "";
-      const telefono = telefonoEl?.value || "";
+      const nombre = nombreEl?.value.trim() || "";
+      const email = emailEl?.value.trim() || "";
+      const telefono = telefonoEl?.value.trim() || "";
       const fechaBoda = fechaBodaEl?.value || "";
-      const mensaje = mensajeEl?.value || "";
+      const mensaje = mensajeEl?.value.trim() || "";
 
       const submitBtn = form.querySelector(
         'button[type="submit"]',
@@ -181,18 +213,18 @@
               "Fecha Estimada de Boda": fechaBoda,
               "Mensaje / Notas": mensaje || "Sin mensaje adicional",
               _subject: `Nueva Solicitud de Cita Nupcial: ${nombre}`,
-              _captcha: "false",
+              _captcha: "true",
             }),
           },
         );
 
-        if (response.ok || response.status === 200) {
+        if (response.ok) {
           if (form && successBanner) {
             form.style.display = "none";
             if (successTitle)
               successTitle.textContent = `¡Solicitud Registrada, ${nombre}!`;
             if (successBody)
-              successBody.textContent = `Hemos recibido tu solicitud de cita. Se ha enviado una notificación directa a rochizad@gmail.com y se comunicará contigo vía WhatsApp o al correo (${email}) en menos de 24 horas.`;
+              successBody.textContent = `Hemos recibido tu solicitud de cita. Se ha enviado una notificación directa al atelier y nos comunicaremos contigo vía WhatsApp o al correo (${email}) en menos de 24 horas.`;
             successBanner.style.display = "block";
           }
         } else {

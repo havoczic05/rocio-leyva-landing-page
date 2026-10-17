@@ -1126,3 +1126,132 @@ textarea:focus-visible {
     text-align: center;
   }
 }
+
+/* ───────────────────────────────────────────────────────────
+ * Accessibility & utility additions for quality audit
+ * ─────────────────────────────────────────────────────────── */
+
+/* Skip-to-main link: visible on focus only */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-inverse);
+  font-family: var(--text-font-family);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--smallcaps-letter-spacing);
+  text-decoration: none;
+  border-radius: var(--button-border-radius);
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 1rem;
+  outline: 2px solid var(--color-accent-gold);
+  outline-offset: 2px;
+}
+
+/* Inline SVG icons */
+.icon-inline {
+  display: inline-block;
+  vertical-align: -0.15em;
+  margin-right: 0.4rem;
+  flex-shrink: 0;
+}
+
+/* Hero outline button on dark background */
+.btn-outline.btn-outline-on-dark {
+  color: #FFFFFF;
+  border-color: #FFFFFF;
+  background-color: transparent;
+}
+.btn-outline.btn-outline-on-dark:hover {
+  background-color: #FFFFFF;
+  color: var(--color-text-primary);
+}
+
+/* Honeypot field: hidden from humans, visible to dumb bots */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Footer contact items (replace inline styles) */
+.footer-contact-item {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--text-sm);
+  margin-bottom: 0.5rem;
+}
+.footer-contact-item:last-child {
+  margin-bottom: 0;
+}
+.footer-contact-item a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.footer-contact-item a:hover,
+.footer-contact-item a:focus-visible {
+  color: var(--color-accent-gold);
+  text-decoration: underline;
+}
+
+/* Card badge (collection) */
+.collection-card-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  font-family: var(--text-font-family);
+  font-size: var(--text-xxs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--smallcaps-letter-spacing);
+  color: var(--color-accent-gold);
+  border: 1px solid var(--color-accent-gold);
+  margin-bottom: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.92);
+}
+
+/* Modal: respect [hidden] attribute, hidden by default */
+.modal-backdrop[hidden] {
+  display: none !important;
+}
+.modal-backdrop.active {
+  display: flex !important;
+}
+
+/* Modal dialog focusable so keyboard users land somewhere sensible */
+.modal-dialog:focus {
+  outline: none;
+}
+
+/* Visible keyboard focus ring across the board */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+.filter-btn:focus-visible {
+  outline: 2px solid var(--color-accent-gold);
+  outline-offset: 3px;
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
